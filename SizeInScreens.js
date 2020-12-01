@@ -1,31 +1,49 @@
-window.addEventListener("resize", windowResize);
-window.addEventListener("scroll", windowResize);
-document.body.addEventListener("scroll", windowResize);
-function windowResize() {
-	var SizeInScreens = document.getElementById("SizeInScreens");
-	if (! SizeInScreens) return;
-	if (floatSizeInScreens.style.color == disableColor) return;
+var mainConteiner = document.body;
+if (document.URL.startsWith("https://www.youtube.com/"))
+	mainConteiner = document.querySelector('ytd-app')
+
+var observer;
+
+if (! observer)
+	addObservers();
+
+function addObservers() {
+	window.addEventListener("resize", windowResize);
+	window.addEventListener("scroll", windowResize);
+	observer = new ResizeObserver(windowResize);
+	observer.observe(mainConteiner);
+}	
+
+function windowResize(ev) {
+	// if (ev instanceof Event) {
+	// 	if (ev.type == "resize")
+	// 		console.log("window.resize", window.innerHeight);
+	// 	if (ev.type == "scroll")
+	// 		console.log("window.scroll", window.pageYOffset);
+	// }
+	// if (ev instanceof Array)
+	// 	for (el of ev)
+	// 		console.log("body.resize", el.contentRect.height)
+
+	var SizeInScreens = document.querySelectorAll("#SizeInScreens");
+	if (SizeInScreens.length == 0) return;
 
 	let heightWindow = window.innerHeight;
 	let curOffset =	window.pageYOffset;
+	let heightBodyAll = mainConteiner.scrollHeight;
 
-	let heightBodyAll = document.body.scrollHeight;
-	if (document.URL.startsWith("https://www.youtube.com/"))
-		heightBodyAll = document.querySelector('ytd-app').scrollHeight;
-
-	SizeInScreens.innerText = Math.ceil(curOffset/heightWindow) + " / " + Math.round(heightBodyAll/heightWindow);
+	for (el of SizeInScreens)
+		el.innerText = Math.ceil(curOffset/heightWindow) + " / " + Math.round(heightBodyAll/heightWindow)
 };
 
 
-new ResizeObserver(windowResize).observe(document.body);
-
-document.body.prepend(createCheckboxElement());
+var floatSizeInScreens = createSizeInScreensElement()
+document.body.prepend(floatSizeInScreens);
 windowResize();
 floatSizeInScreens.style.left = window.innerWidth - parseInt(floatSizeInScreens.offsetWidth) - 50 + "px";
 
-var disableColor = "white";
 
-function createCheckboxElement(){
+function createSizeInScreensElement(){
 	console.log("Create SizeInScreens element"); 
 	var div = document.createElement("div"); 
 	div.id = "floatSizeInScreens";
@@ -51,14 +69,7 @@ floatSizeInScreens.onclick = function(event) {
 }
 
 floatSizeInScreens.ondblclick = function(event) {
-	floatSizeInScreens.remove()
-	// if (floatSizeInScreens.style.color !== disableColor) {
-	// 	floatSizeInScreens.style.color = disableColor;
-	// 	floatSizeInScreens.style.border = "1px solid lightgrey";
-	// } else {
-	// 	floatSizeInScreens.style.color = "";
-	// 	floatSizeInScreens.style.border = "";
-	// }
+	this.remove()
 }
 
 
@@ -75,15 +86,15 @@ floatSizeInScreens.onmousemove = function(event) {
 	if (mousePressed) {
 		let curX;
 		let curY;
-		if (floatSizeInScreens.style.left)
-			curX = parseInt(floatSizeInScreens.style.left);
+		if (this.style.left)
+			curX = parseInt(this.style.left);
 		else
 			curX = 0;
-		if (floatSizeInScreens.style.top)
-			curY = parseInt(floatSizeInScreens.style.top);
+		if (this.style.top)
+			curY = parseInt(this.style.top);
 		else
 			curY = 0;			
-		floatSizeInScreens.style.left = curX + event.movementX + "px"
-		floatSizeInScreens.style.top = curY + event.movementY + "px"
+		this.style.left = curX + event.movementX + "px"
+		this.style.top = curY + event.movementY + "px"
 	} 
 }
