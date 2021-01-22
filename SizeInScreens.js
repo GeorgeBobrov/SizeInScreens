@@ -95,10 +95,9 @@ function createSizeInScreensElement(){
 	div.onmouseenter = function(event) {
 		span.style.cursor = "move";
 		timerMouseEnter = setTimeout(function() {
+			checkAddressInSavedAddresses();
 			divButtons.style.display = "block"
 			span.style.cursor = "unset";	
-			// setTimeout(function() {	
-			// }, 500) 			
 		}, 500) 
 	}
 
@@ -149,18 +148,18 @@ function createSizeInScreensElement(){
 	return div;
 
 	function checkAddressInSavedAddresses() {
-		buttonAdd.style.display = "unset";
-		buttonRemove.style.display = "none";
-		
 		chrome.storage.local.get([idAddresses], function(data) {
 			let addresses = data[idAddresses] || [];
+			let presence = false;
 			for (const addr of addresses)
 				if (document.URL.startsWith(addr)) {
-					buttonAdd.style.display = "none";
-					buttonRemove.style.display = "unset";
 					buttonRemove.title = `Remove address "${addr}"`;
+					presence = true;
 					break;
 				}
+
+			buttonAdd.style.display = presence? "none" : "unset";
+			buttonRemove.style.display = presence? "unset" : "none";
 		});	
 	}
 }
@@ -186,6 +185,7 @@ document.addEventListener("mouseup", function(event) {
 
 floatSizeInScreens.onmousemove = function(event) {
 	if (mousePressed) {
+		if (event.target.tagName.toLowerCase() === "button") return;
 		let curX;
 		let curY;
 		if (this.style.left)
@@ -198,6 +198,7 @@ floatSizeInScreens.onmousemove = function(event) {
 			curY = 0;			
 		this.style.left = curX + event.movementX + "px"
 		this.style.top = curY + event.movementY + "px"
+
 		this.onmouseleave();
 	} 
 }
