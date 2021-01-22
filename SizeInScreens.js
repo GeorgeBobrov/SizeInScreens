@@ -2,6 +2,7 @@ var mainConteiner = document.body;
 if (document.URL.startsWith("https://www.youtube.com/"))
 	mainConteiner = document.querySelector('ytd-app')
 
+var idSizeInScreensAddresses = 'SizeInScreensAddresses';
 var observer;
 
 if (! observer)
@@ -37,7 +38,7 @@ function windowResize(ev) {
 };
 
 
-var floatSizeInScreens = createSizeInScreensElement()
+var floatSizeInScreens = createSizeInScreensElement();
 document.body.prepend(floatSizeInScreens);
 windowResize();
 floatSizeInScreens.style.left = window.innerWidth - parseInt(floatSizeInScreens.offsetWidth) - 50 + "px";
@@ -60,16 +61,118 @@ function createSizeInScreensElement(){
 	span.innerHTML = "0";
 	span.id = "SizeInScreens";
 
+
 	div.appendChild(span);
+
+	var divButtons = document.createElement("div"); 
+	divButtons.id = "SISButtons";
+	divButtons.style.display = "none"
+
+	// Added buttons for automatic launch on any given site
+	var buttonAdd = document.createElement("button"); 
+	buttonAdd.innerHTML = "+";
+	buttonAdd.title = "Add address";
+	divButtons.appendChild(buttonAdd);
+
+	var buttonRemove = document.createElement("button"); 
+	buttonRemove.innerHTML = "-";
+	buttonRemove.style.display = "none";
+	buttonRemove.title = "Remove address";	
+	divButtons.appendChild(buttonRemove);
+
+	var buttonClose = document.createElement("button"); 
+	buttonClose.innerHTML = "X";
+	buttonClose.title = "Close";	
+	divButtons.appendChild(buttonClose);
+	buttonClose.onclick = function(event) {
+		div.remove();
+	};
+
+	div.appendChild(divButtons);	
+	checkAddressInSavedAddresses();
+
+	let timerMouseEnter;
+	div.onmouseenter = function(event) {
+		span.style.cursor = "move";
+		timerMouseEnter = setTimeout(function() {
+			divButtons.style.display = "block"
+			span.style.cursor = "unset";	
+			// setTimeout(function() {	
+			// }, 500) 			
+		}, 500) 
+	}
+
+	div.onmouseleave = function(event) {
+		divButtons.style.display = "none";
+		clearTimeout(timerMouseEnter);
+	}
+	buttonAdd.onclick = function(event) {
+		newAddr = prompt('Always show SizeInScreens if URL address starts like this?', document.URL)
+		if (!newAddr) return;
+	
+		chrome.storage.local.get([idSizeInScreensAddresses], function(data) {
+			let readAddresses = data[idSizeInScreensAddresses];
+			let addresses = [];
+			if (readAddresses)
+				addresses = readAddresses;		
+			if (addresses.indexOf(newAddr) > -1)
+				return;
+			addresses.push(newAddr)
+	
+			chrome.storage.local.set({ [idSizeInScreensAddresses]: addresses }, function() {
+				console.info("SizeInScreens: Saved new Address " + newAddr);
+				checkAddressInSavedAddresses();
+			});
+		});
+	}
+	
+	buttonRemove.onclick = function(event) {
+		chrome.storage.local.get([idSizeInScreensAddresses], function(data) {
+			let readAddresses = data[idSizeInScreensAddresses];
+			let addresses = [];
+			let wasDeleted = false;
+	
+			for (const addr of readAddresses) {
+				if (document.URL.startsWith(addr) && !wasDeleted) 
+					wasDeleted = confirm(`Don't show SizeInScreens if URL address starts like this "${addr}" ?`);
+				else
+					addresses.push(addr);			
+			}
+	
+			if (wasDeleted)
+				chrome.storage.local.set({ [idSizeInScreensAddresses]: addresses }, function() {
+					console.info("SizeInScreens: Address was deleted");
+					checkAddressInSavedAddresses();
+				});		
+	
+		});
+	}
 	return div;
+
+	function checkAddressInSavedAddresses() {
+		buttonAdd.style.display = "unset";
+		buttonRemove.style.display = "none";
+		
+		chrome.storage.local.get([idSizeInScreensAddresses], function(data) {
+			let readAddresses = data[idSizeInScreensAddresses];
+			for (const addr of readAddresses)
+				if (document.URL.startsWith(addr)) {
+					buttonAdd.style.display = "none";
+					buttonRemove.style.display = "unset";
+					buttonRemove.title = `Remove address "${addr}"`;
+					break;
+				}
+		});	
+	}
 }
+
 
 floatSizeInScreens.onclick = function(event) {
 	windowResize();
 }
 
 floatSizeInScreens.ondblclick = function(event) {
-	this.remove()
+	this.remove();
 }
 
 
@@ -96,5 +199,6 @@ floatSizeInScreens.onmousemove = function(event) {
 			curY = 0;			
 		this.style.left = curX + event.movementX + "px"
 		this.style.top = curY + event.movementY + "px"
+		this.onmouseleave();
 	} 
 }

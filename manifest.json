@@ -2,11 +2,7 @@
    "manifest_version": 2,
    "name": "SizeInScreens",
    "description": "Show size of scrollable page in screen sises",
-   "version": "0.5",
-   "content_scripts": [ {
-      "js": [ "SizeInScreens.js" ],
-      "matches": [ "https://habr.com/*" ]
-   } ],
+   "version": "1.0",
    "background": {
       "scripts": ["background.js"],
       "persistent": false
