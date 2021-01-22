@@ -2,7 +2,7 @@ var mainConteiner = document.body;
 if (document.URL.startsWith("https://www.youtube.com/"))
 	mainConteiner = document.querySelector('ytd-app')
 
-var idSizeInScreensAddresses = 'SizeInScreensAddresses';
+var idAddresses = 'Addresses';
 var observer;
 
 if (! observer)
@@ -110,16 +110,14 @@ function createSizeInScreensElement(){
 		newAddr = prompt('Always show SizeInScreens if URL address starts like this?', document.URL)
 		if (!newAddr) return;
 	
-		chrome.storage.local.get([idSizeInScreensAddresses], function(data) {
-			let readAddresses = data[idSizeInScreensAddresses];
-			let addresses = [];
-			if (readAddresses)
-				addresses = readAddresses;		
+		chrome.storage.local.get([idAddresses], function(data) {
+			let addresses = data[idAddresses] || [];
+		
 			if (addresses.indexOf(newAddr) > -1)
 				return;
 			addresses.push(newAddr)
 	
-			chrome.storage.local.set({ [idSizeInScreensAddresses]: addresses }, function() {
+			chrome.storage.local.set({ [idAddresses]: addresses }, function() {
 				console.info("SizeInScreens: Saved new Address " + newAddr);
 				checkAddressInSavedAddresses();
 			});
@@ -127,20 +125,21 @@ function createSizeInScreensElement(){
 	}
 	
 	buttonRemove.onclick = function(event) {
-		chrome.storage.local.get([idSizeInScreensAddresses], function(data) {
-			let readAddresses = data[idSizeInScreensAddresses];
-			let addresses = [];
+		chrome.storage.local.get([idAddresses], function(data) {
+			let addresses = data[idAddresses] || [];
+
+			let newAddresses = [];
 			let wasDeleted = false;
 	
-			for (const addr of readAddresses) {
+			for (const addr of addresses) {
 				if (document.URL.startsWith(addr) && !wasDeleted) 
 					wasDeleted = confirm(`Don't show SizeInScreens if URL address starts like this "${addr}" ?`);
 				else
-					addresses.push(addr);			
+					newAddresses.push(addr);			
 			}
 	
 			if (wasDeleted)
-				chrome.storage.local.set({ [idSizeInScreensAddresses]: addresses }, function() {
+				chrome.storage.local.set({ [idAddresses]: newAddresses }, function() {
 					console.info("SizeInScreens: Address was deleted");
 					checkAddressInSavedAddresses();
 				});		
@@ -153,9 +152,9 @@ function createSizeInScreensElement(){
 		buttonAdd.style.display = "unset";
 		buttonRemove.style.display = "none";
 		
-		chrome.storage.local.get([idSizeInScreensAddresses], function(data) {
-			let readAddresses = data[idSizeInScreensAddresses];
-			for (const addr of readAddresses)
+		chrome.storage.local.get([idAddresses], function(data) {
+			let addresses = data[idAddresses] || [];
+			for (const addr of addresses)
 				if (document.URL.startsWith(addr)) {
 					buttonAdd.style.display = "none";
 					buttonRemove.style.display = "unset";

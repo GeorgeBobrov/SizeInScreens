@@ -1,4 +1,4 @@
-var idSizeInScreensAddresses = 'SizeInScreensAddresses';
+var idAddresses = 'Addresses';
 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     // console.log('tabs.onUpdated');
@@ -11,9 +11,9 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     if (tab.status === "complete") {
     // console.log(changeInfo);      
     // console.log(tab);
-        chrome.storage.local.get([idSizeInScreensAddresses], function(data) {
-            let readAddresses = data[idSizeInScreensAddresses];
-            for (const addr of readAddresses)
+        chrome.storage.local.get([idAddresses], function(data) {
+			let addresses = data[idAddresses] || [];
+			for (const addr of addresses)
                 if (tab.url.startsWith(addr)) {
                     console.log(addr);
                     console.log('run SizeInScreens.js on ' + tab.url);
