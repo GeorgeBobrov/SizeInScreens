@@ -68,28 +68,38 @@ function createSizeInScreensElement(){
 	divButtons.id = "SISButtons";
 	divButtons.style.display = "none"
 
+	const buttonStyle = `
+		font-family: Courier, monospace;
+		padding: 0px 0px;
+		width: 48%;
+		line-height: 1.15;
+		border: revert;`;
+
 	// Added buttons for automatic launch on any given site
 	var buttonAdd = document.createElement("button"); 
 	buttonAdd.innerHTML = "+";
 	buttonAdd.title = "Add address";
+	buttonAdd.style = buttonStyle;
 	divButtons.appendChild(buttonAdd);
 
 	var buttonRemove = document.createElement("button"); 
 	buttonRemove.innerHTML = "-";
 	buttonRemove.style.display = "none";
 	buttonRemove.title = "Remove address";	
+	buttonRemove.style = buttonStyle;
 	divButtons.appendChild(buttonRemove);
 
 	var buttonClose = document.createElement("button"); 
-	buttonClose.innerHTML = "X";
+	buttonClose.innerHTML = "✖";
 	buttonClose.title = "Close";	
+	buttonClose.style = buttonStyle + 'color: coral; margin-inline-start: 4%;';
 	divButtons.appendChild(buttonClose);
 	buttonClose.onclick = function(event) {
 		div.remove();
 	};
 
 	div.appendChild(divButtons);	
-	checkAddressInSavedAddresses();
+	// checkAddressInSavedAddresses();
 
 	let timerMouseEnter;
 	div.onmouseenter = function(event) {
@@ -170,7 +180,12 @@ floatSizeInScreens.onclick = function(event) {
 }
 
 floatSizeInScreens.ondblclick = function(event) {
-	this.remove();
+	chrome.storage.local.get([idAddresses], function(data) {
+		let addresses = data[idAddresses] || [];
+		alert(addresses.join("\n"))
+	});	
+
+	// this.remove();
 }
 
 
