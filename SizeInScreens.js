@@ -78,20 +78,20 @@ function createSizeInScreensElement(){
 	// Added buttons for automatic launch on any given site
 	var buttonAdd = document.createElement("button"); 
 	buttonAdd.innerHTML = "+";
-	buttonAdd.title = "Add address";
+	buttonAdd.title = "Always show SizeInScreens on this site";
 	buttonAdd.style = buttonStyle;
 	divButtons.appendChild(buttonAdd);
 
 	var buttonRemove = document.createElement("button"); 
 	buttonRemove.innerHTML = "-";
 	buttonRemove.style.display = "none";
-	buttonRemove.title = "Remove address";	
+	buttonRemove.title = "Don't show SizeInScreens on this site";
 	buttonRemove.style = buttonStyle;
 	divButtons.appendChild(buttonRemove);
 
 	var buttonClose = document.createElement("button"); 
 	buttonClose.innerHTML = "✖";
-	buttonClose.title = "Close";	
+	buttonClose.title = "Close SizeInScreens";	
 	buttonClose.style = buttonStyle + 'color: coral; margin-inline-start: 4%;';
 	divButtons.appendChild(buttonClose);
 	buttonClose.onclick = function(event) {
@@ -116,7 +116,8 @@ function createSizeInScreensElement(){
 		clearTimeout(timerMouseEnter);
 	}
 	buttonAdd.onclick = function(event) {
-		newAddr = prompt('Always show SizeInScreens if URL address starts like this?', document.URL)
+		newAddr = prompt(`Always show SizeInScreens if URL address starts like this? 
+(you can delete last part of address and leave only the site address)`, document.URL)
 		if (!newAddr) return;
 	
 		chrome.storage.local.get([idAddresses], function(data) {
@@ -142,7 +143,8 @@ function createSizeInScreensElement(){
 	
 			for (const addr of addresses) {
 				if (document.URL.startsWith(addr) && !wasDeleted) 
-					wasDeleted = confirm(`Don't show SizeInScreens if URL address starts like this "${addr}" ?`);
+					wasDeleted = confirm(`Don't show SizeInScreens if URL address starts like this 
+"${addr}" ?`);
 				else
 					newAddresses.push(addr);			
 			}
@@ -163,7 +165,6 @@ function createSizeInScreensElement(){
 			let presence = false;
 			for (const addr of addresses)
 				if (document.URL.startsWith(addr)) {
-					buttonRemove.title = `Remove address "${addr}"`;
 					presence = true;
 					break;
 				}
