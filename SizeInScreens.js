@@ -1,3 +1,4 @@
+/*global chrome*/
 var mainConteiner = document.body;
 if (document.URL.startsWith("https://www.youtube.com/"))
 	mainConteiner = document.querySelector('ytd-app')
@@ -5,7 +6,7 @@ if (document.URL.startsWith("https://www.youtube.com/"))
 var idAddresses = 'Addresses';
 var observer;
 
-if (! observer)
+if (!observer)
 	addObservers();
 
 function addObservers() {
@@ -13,7 +14,7 @@ function addObservers() {
 	window.addEventListener("scroll", windowResize);
 	observer = new ResizeObserver(windowResize);
 	observer.observe(mainConteiner);
-}	
+}
 
 function windowResize(ev) {
 	// if (ev instanceof Event) {
@@ -26,16 +27,16 @@ function windowResize(ev) {
 	// 	for (el of ev)
 	// 		console.log("body.resize", el.contentRect.height)
 
-	var SizeInScreens = document.querySelectorAll("#SizeInScreens");
+	let SizeInScreens = document.querySelectorAll("#SizeInScreens");
 	if (SizeInScreens.length == 0) return;
 
 	let heightWindow = window.innerHeight;
 	let curOffset =	window.pageYOffset;
 	let heightBodyAll = mainConteiner.scrollHeight;
 
-	for (el of SizeInScreens)
+	for (const el of SizeInScreens)
 		el.innerText = Math.ceil(curOffset/heightWindow) + " / " + Math.round(heightBodyAll/heightWindow)
-};
+}
 
 
 var floatSizeInScreens = createSizeInScreensElement();
@@ -46,7 +47,7 @@ floatSizeInScreens.style.left = window.innerWidth - parseInt(floatSizeInScreens.
 
 function createSizeInScreensElement(){
 	console.log("Create SizeInScreens element"); 
-	var div = document.createElement("div"); 
+	let div = document.createElement("div"); 
 	div.id = "floatSizeInScreens";
 	div.style.position = "fixed";
 	div.style.zIndex = 9999;
@@ -56,15 +57,16 @@ function createSizeInScreensElement(){
 	div.style.left = window.innerWidth - 50 + "px";
 	div.style.top = 15 + "px";
 	div.style.userSelect = "none";
+	div.draggable = true;
 
-	var span = document.createElement("span");	
+	let span = document.createElement("span");
 	span.innerHTML = "0";
 	span.id = "SizeInScreens";
 
 
 	div.appendChild(span);
 
-	var divButtons = document.createElement("div"); 
+	let divButtons = document.createElement("div"); 
 	divButtons.id = "SISButtons";
 	divButtons.style.display = "none"
 
@@ -76,29 +78,29 @@ function createSizeInScreensElement(){
 		border: revert;`;
 
 	// Added buttons for automatic launch on any given site
-	var buttonAdd = document.createElement("button"); 
+	let buttonAdd = document.createElement("button");
 	buttonAdd.innerHTML = "+";
 	buttonAdd.title = "Always show SizeInScreens on this site";
 	buttonAdd.style = buttonStyle;
 	divButtons.appendChild(buttonAdd);
 
-	var buttonRemove = document.createElement("button"); 
+	let buttonRemove = document.createElement("button");
 	buttonRemove.innerHTML = "-";
 	buttonRemove.style.display = "none";
 	buttonRemove.title = "Don't show SizeInScreens on this site";
 	buttonRemove.style = buttonStyle;
 	divButtons.appendChild(buttonRemove);
 
-	var buttonClose = document.createElement("button"); 
+	let buttonClose = document.createElement("button");
 	buttonClose.innerHTML = "✖";
-	buttonClose.title = "Close SizeInScreens";	
+	buttonClose.title = "Close SizeInScreens";
 	buttonClose.style = buttonStyle + 'color: coral; margin-inline-start: 4%;';
 	divButtons.appendChild(buttonClose);
 	buttonClose.onclick = function(event) {
 		div.remove();
 	};
 
-	div.appendChild(divButtons);	
+	div.appendChild(divButtons);
 	// checkAddressInSavedAddresses();
 
 	let timerMouseEnter;
@@ -107,54 +109,55 @@ function createSizeInScreensElement(){
 		timerMouseEnter = setTimeout(function() {
 			checkAddressInSavedAddresses();
 			divButtons.style.display = "block"
-			span.style.cursor = "unset";	
-		}, 500) 
+			span.style.cursor = "unset";
+		}, 500);
 	}
 
 	div.onmouseleave = function(event) {
 		divButtons.style.display = "none";
 		clearTimeout(timerMouseEnter);
 	}
+
 	buttonAdd.onclick = function(event) {
-		newAddr = prompt(`Always show SizeInScreens if URL address starts like this? 
-(you can delete last part of address and leave only the site address)`, document.URL)
+		let newAddr = prompt(`Always show SizeInScreens if URL address starts like this? 
+(you can delete last part of address and leave only the site address)`, document.URL);
 		if (!newAddr) return;
-	
+
 		chrome.storage.local.get([idAddresses], function(data) {
 			let addresses = data[idAddresses] || [];
-		
+
 			if (addresses.indexOf(newAddr) > -1)
 				return;
 			addresses.push(newAddr)
-	
+
 			chrome.storage.local.set({ [idAddresses]: addresses }, function() {
 				console.info("SizeInScreens: Saved new Address " + newAddr);
 				checkAddressInSavedAddresses();
 			});
 		});
 	}
-	
+
 	buttonRemove.onclick = function(event) {
 		chrome.storage.local.get([idAddresses], function(data) {
 			let addresses = data[idAddresses] || [];
 
 			let newAddresses = [];
 			let wasDeleted = false;
-	
+
 			for (const addr of addresses) {
-				if (document.URL.startsWith(addr) && !wasDeleted) 
+				if (document.URL.startsWith(addr) && !wasDeleted)
 					wasDeleted = confirm(`Don't show SizeInScreens if URL address starts like this 
 "${addr}" ?`);
 				else
-					newAddresses.push(addr);			
+					newAddresses.push(addr);
 			}
-	
+
 			if (wasDeleted)
 				chrome.storage.local.set({ [idAddresses]: newAddresses }, function() {
 					console.info("SizeInScreens: Address was deleted");
 					checkAddressInSavedAddresses();
-				});		
-	
+				});
+
 		});
 	}
 	return div;
@@ -171,7 +174,7 @@ function createSizeInScreensElement(){
 
 			buttonAdd.style.display = presence? "none" : "unset";
 			buttonRemove.style.display = presence? "unset" : "none";
-		});	
+		});
 	}
 }
 
@@ -184,37 +187,42 @@ floatSizeInScreens.ondblclick = function(event) {
 	chrome.storage.local.get([idAddresses], function(data) {
 		let addresses = data[idAddresses] || [];
 		alert(addresses.join("\n"))
-	});	
-
-	// this.remove();
+	});
 }
 
 
-var mousePressed = false; 
-floatSizeInScreens.onmousedown = function(event) {
-	mousePressed = true; 
+var savedOffsetX;
+var savedOffsetY;
+var SizeInScreensDrag = false;
+
+floatSizeInScreens.ondragstart = function(event) {
+	let SISButtons = this.querySelector("#SISButtons");
+	if ((SISButtons.style.display === "block") && (event.offsetY > SISButtons.offsetTop)) {
+		event.preventDefault();  //cancel dragging by grabbing buttons
+		return;
+	}
+
+	savedOffsetX = event.offsetX;
+	savedOffsetY = event.offsetY;
+	SizeInScreensDrag = true;
+	this.onmouseleave();  //hide buttons while dragging
 }
 
-document.addEventListener("mouseup", function(event) {
-	mousePressed = false; 
-});
+floatSizeInScreens.ondragend = function(event) {
+	let movementX = event.offsetX - savedOffsetX;
+	let movementY = event.offsetY - savedOffsetY;
 
-floatSizeInScreens.onmousemove = function(event) {
-	if (mousePressed) {
-		if (event.target.tagName.toLowerCase() === "button") return;
-		let curX;
-		let curY;
-		if (this.style.left)
-			curX = parseInt(this.style.left);
-		else
-			curX = 0;
-		if (this.style.top)
-			curY = parseInt(this.style.top);
-		else
-			curY = 0;			
-		this.style.left = curX + event.movementX + "px"
-		this.style.top = curY + event.movementY + "px"
+	let curX = (this.style.left) ? parseInt(this.style.left) : 0;
+	let curY = (this.style.top) ? parseInt(this.style.top) : 0;
 
-		this.onmouseleave();
-	} 
+	this.style.left = curX + movementX + "px"
+	this.style.top = curY + movementY + "px"
+	SizeInScreensDrag = false;
+}
+
+window.addEventListener("dragover", windowDragower);
+
+function windowDragower(event) {
+	if (SizeInScreensDrag)
+		event.preventDefault();  //change the default non-drag icon to allow-drag icon
 }
