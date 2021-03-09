@@ -24,7 +24,7 @@ function windowResize(ev) {
 	// 		console.log("window.scroll", window.pageYOffset);
 	// }
 	// if (ev instanceof Array)
-	// 	for (el of ev)
+	// 	for (const el of ev)
 	// 		console.log("body.resize", el.contentRect.height)
 
 	let SizeInScreens = document.querySelectorAll("#SizeInScreens");
@@ -42,19 +42,18 @@ function windowResize(ev) {
 var floatSizeInScreens = createSizeInScreensElement();
 document.body.prepend(floatSizeInScreens);
 windowResize();
-floatSizeInScreens.style.left = window.innerWidth - parseInt(floatSizeInScreens.offsetWidth) - 50 + "px";
 
 
-function createSizeInScreensElement(){
-	console.log("Create SizeInScreens element"); 
-	let div = document.createElement("div"); 
+function createSizeInScreensElement() {
+	console.log("Create SizeInScreens element");
+	let div = document.createElement("div");
 	div.id = "floatSizeInScreens";
 	div.style.position = "fixed";
 	div.style.zIndex = 9999;
 	// div.style.border = "1px solid lightgrey";
 	div.style.backgroundColor = "white";
 	div.style.padding = "0 4px";
-	div.style.left = window.innerWidth - 50 + "px";
+	div.style.right = 15 + "px";
 	div.style.top = 15 + "px";
 	div.style.userSelect = "none";
 	div.draggable = true;
@@ -63,10 +62,9 @@ function createSizeInScreensElement(){
 	span.innerHTML = "0";
 	span.id = "SizeInScreens";
 
-
 	div.appendChild(span);
 
-	let divButtons = document.createElement("div"); 
+	let divButtons = document.createElement("div");
 	divButtons.id = "SISButtons";
 	divButtons.style.display = "none"
 
@@ -109,7 +107,7 @@ function createSizeInScreensElement(){
 		timerMouseEnter = setTimeout(function() {
 			checkAddressInSavedAddresses();
 			divButtons.style.display = "block"
-			span.style.cursor = "unset";
+			span.style.cursor = "";
 		}, 500);
 	}
 
@@ -165,15 +163,15 @@ function createSizeInScreensElement(){
 	function checkAddressInSavedAddresses() {
 		chrome.storage.local.get([idAddresses], function(data) {
 			let addresses = data[idAddresses] || [];
-			let presence = false;
+			let savedAddress = false;
 			for (const addr of addresses)
 				if (document.URL.startsWith(addr)) {
-					presence = true;
+					savedAddress = true;
 					break;
 				}
 
-			buttonAdd.style.display = presence? "none" : "unset";
-			buttonRemove.style.display = presence? "unset" : "none";
+			buttonAdd.style.display = savedAddress ? "none" : "";
+			buttonRemove.style.display = savedAddress ? "" : "none";
 		});
 	}
 }
@@ -212,11 +210,18 @@ floatSizeInScreens.ondragend = function(event) {
 	let movementX = event.offsetX - savedOffsetX;
 	let movementY = event.offsetY - savedOffsetY;
 
-	let curX = (this.style.left) ? parseInt(this.style.left) : 0;
-	let curY = (this.style.top) ? parseInt(this.style.top) : 0;
+	let newLeft = this.offsetLeft + movementX;
+	let newTop = this.offsetTop + movementY;
 
-	this.style.left = curX + movementX + "px"
-	this.style.top = curY + movementY + "px"
+	if (newLeft < window.visualViewport.width / 2) {
+		this.style.left = newLeft + "px";
+		this.style.right = "";
+	} else {
+		this.style.right = window.visualViewport.width - newLeft - this.offsetWidth + "px";
+		this.style.left = "";
+	}
+	this.style.top = newTop + "px";
+
 	SizeInScreensDrag = false;
 }
 
